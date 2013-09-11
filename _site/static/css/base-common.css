@@ -125,6 +125,7 @@ body .fn-hide {
 }
 .fn-left {
 	float:left;
+	font-size:14px;
 }
 .fn-right {
 	float:right;
@@ -190,7 +191,7 @@ footer {
 }
 #logo {
   display:inline-block;
-  width:105px;
+  width:220px;
   font-size:24px;
   font-family:"UltraRegular", Calibri, "宋体";
   line-height:32px;
