@@ -1,0 +1,52 @@
+/*
+  @名称: index
+	@功能: 首页样式
+*/
+h2 {
+  font-size:18px;
+  font-weight:bold;
+  color:black;
+}
+#article,
+#project,
+#aboutme {
+  margin:30px auto 0;
+}
+#article ul,
+#project ul,
+#aboutme p {
+  margin:0 2em;
+}
+#article time {
+  color:#999;
+}
+#article ul {
+  line-height:1.8;
+}
+#project li {
+  margin:8px 8px 0 0;
+}
+#project a {
+  display:inline-block;
+  border:1px solid #ccc;
+  padding:2px;
+}
+#project a:hover {
+  border:2px solid #A10000;
+  padding:1px;
+}
+#project img {
+  display:block;
+  width:100px;
+  height:100px;
+}
+#aboutme {
+  line-height:2.2;
+}
+#aboutme span {
+  font-weight:bold;
+  margin-right:10px;
+}
+#aboutme a {
+  margin-right:15px;
+}

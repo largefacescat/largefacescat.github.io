@@ -2,20 +2,12 @@
 <html> 
 <head> 
 <meta charset="utf-8">
-<title>{{ page.title }}</title>
-{% if page.description %}
-<meta name="description" content="{{ page.description }}" />
-{% endif %}
-{% if page.keywords %}
-<meta name="keywords" content="{{ page.keywords }}" />
-{% endif %}
+<title>Arctile</title>
+
+
 <link rel="stylesheet" href="/static/css/base-common.css" />
 <link rel="stylesheet" href="/static/css/largefacescat.css" />
-{% if page.styles %}
-{% for style in page.styles %}
-<link rel="stylesheet" href="/static/css/{{ style }}.css" />
-{% endfor %}
-{% endif %}
+
 <script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
 <!--[if lt IE 9]>
 <script src="/static/js/html5.js"></script>
@@ -59,11 +51,23 @@
   </nav>
 </header>
 <div id="main">
-{{ content }}
+<section id="article">
+  <h2>Article</h2>
+  <ul>
+    
+      <li><time datetime="2013-09-12">12 Sep 2013</time> &raquo; <a href="/2013/09/12/hello-largefacescat.html">hello largefacescat</a></li>
+    
+      <li><time datetime="2011-12-26">26 Dec 2011</time> &raquo; <a href="/2011/12/26/use-Jekyll-build-Blog-on-Github.html">使用Jekyll在Github上搭建博客</a></li>
+    
+      <li><time datetime="2011-05-10">10 May 2011</time> &raquo; <a href="/2011/05/10/learn-jquery-event.html">jQuery Event 源码学习</a></li>
+    
+  </ul>
+</section>
+
 </div>
 
     <footer>
-        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - {{site.time | date:"%Y"}} by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
+        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - 2013 by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
     </footer>
 
 <script type="text/javascript">

@@ -1,0 +1,23 @@
+---
+layout: default
+---
+<style>
+h2 {
+  font-size:18px;
+  font-weight:bold;
+  color:black;
+}
+.about{
+  margin:30px 0 20px 0;
+}
+</style>
+<section class="about">
+<h2>{{ page.title }}</h2>
+{{ content }}
+</section>
+
+<a href="http://weibo.com/u/2464071124?s=6uyXnP" target="_blank"><img border="0" src="http://service.t.sina.com.cn/widget/qmd/2464071124/aad42972/1.png"/></a>
+{% if page.comments %}
+{% include comments.md %}
+{% endif %}
+

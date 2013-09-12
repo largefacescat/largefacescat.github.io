@@ -2,20 +2,12 @@
 <html> 
 <head> 
 <meta charset="utf-8">
-<title>{{ page.title }}</title>
-{% if page.description %}
-<meta name="description" content="{{ page.description }}" />
-{% endif %}
-{% if page.keywords %}
-<meta name="keywords" content="{{ page.keywords }}" />
-{% endif %}
+<title>About me</title>
+
+
 <link rel="stylesheet" href="/static/css/base-common.css" />
 <link rel="stylesheet" href="/static/css/largefacescat.css" />
-{% if page.styles %}
-{% for style in page.styles %}
-<link rel="stylesheet" href="/static/css/{{ style }}.css" />
-{% endfor %}
-{% endif %}
+
 <script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
 <!--[if lt IE 9]>
 <script src="/static/js/html5.js"></script>
@@ -59,11 +51,36 @@
   </nav>
 </header>
 <div id="main">
-{{ content }}
+<style>
+h2 {
+  font-size:18px;
+  font-weight:bold;
+  color:black;
+}
+.about{
+  margin:30px 0 20px 0;
+}
+</style>
+<section class="about">
+<h2>About me</h2>
+<p>屌丝程序猿一枚，正在努力不给国家拖后腿~~~</p>
+
+<p>个人邮箱: <a href="mailto:327163431@qq.com">327163431@qq.com</a>   <br/>
+新浪微博: <a href="http://weibo.com/backbone007">lucky_玉米</a> <br/>
+github : <a href="https://github.com/largefacescat">largefacescat</a></p>
+
+<hr />
+
+</section>
+
+<a href="http://weibo.com/u/2464071124?s=6uyXnP" target="_blank"><img border="0" src="http://service.t.sina.com.cn/widget/qmd/2464071124/aad42972/1.png"/></a>
+
+
+
 </div>
 
     <footer>
-        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - {{site.time | date:"%Y"}} by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
+        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - 2013 by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
     </footer>
 
 <script type="text/javascript">

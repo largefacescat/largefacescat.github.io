@@ -2,20 +2,12 @@
 <html> 
 <head> 
 <meta charset="utf-8">
-<title>{{ page.title }}</title>
-{% if page.description %}
-<meta name="description" content="{{ page.description }}" />
-{% endif %}
-{% if page.keywords %}
-<meta name="keywords" content="{{ page.keywords }}" />
-{% endif %}
+<title>hello largefacescat</title>
+
+
 <link rel="stylesheet" href="/static/css/base-common.css" />
 <link rel="stylesheet" href="/static/css/largefacescat.css" />
-{% if page.styles %}
-{% for style in page.styles %}
-<link rel="stylesheet" href="/static/css/{{ style }}.css" />
-{% endfor %}
-{% endif %}
+
 <script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
 <!--[if lt IE 9]>
 <script src="/static/js/html5.js"></script>
@@ -59,11 +51,55 @@
   </nav>
 </header>
 <div id="main">
-{{ content }}
+<style>
+article {
+  margin:30px auto 0;
+  color:#666;
+}
+article h1 {
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+  line-height:2;
+  color:black;
+}
+article h2 {
+  font-weight:bold;
+  line-height:2;
+  color:black;
+  font-size:20px;
+  margin-top:10px;
+}
+article p {
+  margin:12px 0;
+  text-indent:2em;
+  font-size:18px;
+  line-height:1.8;
+}
+article p b {
+  font-weight:bold;
+  color:#333;
+}
+article ol {
+  list-style:decimal;
+  margin-left:25px;
+  font-size:16px;
+  line-height:1.6;
+}
+article p code {
+  background:#333;
+  color: white;
+}
+</style>
+<article>
+  <h1>hello largefacescat</h1>
+  
+
+</article>
 </div>
 
     <footer>
-        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - {{site.time | date:"%Y"}} by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
+        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - 2013 by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
     </footer>
 
 <script type="text/javascript">
