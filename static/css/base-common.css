@@ -177,6 +177,7 @@ nav a {
   margin:0 10px;
   font-size:100%;
   color:white;
+  overflow: hidden;
 }
 nav a:hover {
   color:#efefef;
@@ -255,5 +256,4 @@ nav #logo {
 	position: fixed;
 	_position: absolute; 
 	_top: expression(documentElement.scrollTop + "px"); 
-	background:#FFF; 
 }
