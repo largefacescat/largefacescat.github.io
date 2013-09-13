@@ -125,6 +125,7 @@ body .fn-hide {
 }
 .fn-left {
 	float:left;
+	font-size:16px;
 }
 .fn-right {
 	float:right;
@@ -161,9 +162,10 @@ a:hover {
 nav,
 footer p,
 #main {
-  width:90%;
+  width:80%;
   max-width:960px;
   margin:0 auto;
+  min-height: 440px;
 }
 header{
   height:32px;
@@ -242,4 +244,16 @@ nav #logo {
   font-size:16px;
   line-height:1.6;
   color:#A10000;
+}
+
+.topNav{
+	float: left; 
+	display: block; 
+	z-index: 100; 
+	width: 970px;
+	overflow: visible; 
+	position: fixed;
+	_position: absolute; 
+	_top: expression(documentElement.scrollTop + "px"); 
+	background:#FFF; 
 }
