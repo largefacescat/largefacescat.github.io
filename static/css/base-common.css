@@ -21,6 +21,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
 body {margin:0; padding:0 10px 0 10px; border:0;  background: #e2e2e2 repeat; } 
 #menu {right:0; 
   top:0; 
+  z-index: 1;
   width:100%; 
   position:fixed; 
   padding:6px; 
