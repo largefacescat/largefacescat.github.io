@@ -41,21 +41,59 @@
 </head>
  
   <body onLoad="setInterval(setTimeSpan,1000);">
-<header>
+<header id="menu">
   <nav class="fn-clear">
     <a href="/" id="logo" class="fn-left">Largefacescat</a>
     <a href="/article/" id="link-article" class="fn-left">Article</a>
-    <a href="/project/" id="link-project" class="fn-left">Project</a>
+    <a href="/categories/" id="link-categories" class="fn-left">Categories</a>
+    <a href="/tags/" id="link-tags" class="fn-left">Tags</a>
     <a href="https://github.com/largefacescat" class="fn-left">Github</a>
     <a href="/about/" id="link-aboutme" class="fn-left">About</a>
   </nav>
 </header>
 <div id="main">
 <style>
-
+.pf_head{
+  position: absolute;
+  top: 110px;
+  left: 180px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  background: #fff;
+}
+.S_bg4{
+  background-color: rgb(250, 250, 250);
+}
+.pf_head_pic{
+  padding: 2px;
+  width: 180px;
+  position: relative;
+}
+.contact_atten{
+  border: 0px none;
+  margin: 5px 0px 4px;
+  width: 184px;
+  line-height: 1.125;
+  padding: 0px;
+}
+.S_line1 {
+    border-color: rgb(217, 217, 217);
+    float: left;
+}
 </style>
+<div class="index_pic_top" node-type="cover" style="background-image:url(http://img.t.sinajs.cn/t5/skin/public/profile_cover/025.jpg)">
+</div>
+  <div class="pf_head S_bg4 S_line1">
+    <div class="pf_head_pic" onmouseout="this.getElementsByTagName('div')[0].style.display='none';" onmouseover="this.getElementsByTagName('div')[0].style.display=''">
+    <img alt="lucky_玉米" src="http://tp1.sinaimg.cn/2464071124/180/5643185018/1"></img>
+    <ul class="contact_atten">
+      <li class="S_line1">ee</li>
+      <li class="S_line1">ddd</li>
+    </ul>
+  </div>
+</div>
 
-<section id="article">
+<div style="  background: #fff;">
+<section id="article" >
   <h2>Article</h2>
   <ul>
     
@@ -77,7 +115,7 @@
   <p><span>Q Q:</span>327163431</p>
   <p><span>E-mail:</span>327163431@qq.com</p>
 </section>
-
+</div>
 <script>
 function moveSection(hash) {
   var body, elem, value;
@@ -103,7 +141,8 @@ moveSection(location.hash);
 
 if (location.pathname === '/') {
   document.getElementById('link-article').onclick = goTo;
-  document.getElementById('link-project').onclick = goTo;
+  document.getElementById('link-categories').onclick = goTo;
+  document.getElementById('link-tags').onclick = goTo;
   document.getElementById('link-aboutme').onclick = goTo;
 }
 

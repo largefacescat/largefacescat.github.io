@@ -45,11 +45,12 @@
 </head>
  
   <body onLoad="setInterval(setTimeSpan,1000);">
-<header>
+<header id="menu">
   <nav class="fn-clear">
     <a href="/" id="logo" class="fn-left">Largefacescat</a>
     <a href="/article/" id="link-article" class="fn-left">Article</a>
-    <a href="/project/" id="link-project" class="fn-left">Project</a>
+    <a href="/categories/" id="link-categories" class="fn-left">Categories</a>
+    <a href="/tags/" id="link-tags" class="fn-left">Tags</a>
     <a href="https://github.com/largefacescat" class="fn-left">Github</a>
     <a href="/about/" id="link-aboutme" class="fn-left">About</a>
   </nav>
@@ -57,7 +58,7 @@
 <div id="main">
 <style>
 article {
-  margin:30px auto 0;
+  margin:70px auto 0;
   color:#666;
 }
 article h1 {
@@ -95,7 +96,7 @@ article p code {
   color: white;
 }
 </style>
-<article>
+<article >
   <h1>使用Jekyll在Github上搭建博客</h1>
   <p>Jekyll是一个使用Ruby编写的静态站点生成工具，使用Liquid模板渲染引擎，支持Markdown和Textile标记语言，并且可以为所有以 .html、.markdown、.textile扩展名结尾的文件使用YAML配置，内置语法高亮功能。而Github的Pages服务可以为每个Github主机上的仓库提供静态页面服务，并且Pages服务支持Jekyll。因为Github Pages有两种Pages，分别是用户页面和项目页面，所以我们可以使用用户页面来创建自己的Blog。</p>
 

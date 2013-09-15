@@ -45,11 +45,12 @@
 </head>
  
   <body onLoad="setInterval(setTimeSpan,1000);">
-<header>
+<header id="menu">
   <nav class="fn-clear">
     <a href="/" id="logo" class="fn-left">Largefacescat</a>
     <a href="/article/" id="link-article" class="fn-left">Article</a>
-    <a href="/project/" id="link-project" class="fn-left">Project</a>
+    <a href="/categories/" id="link-categories" class="fn-left">Categories</a>
+    <a href="/tags/" id="link-tags" class="fn-left">Tags</a>
     <a href="https://github.com/largefacescat" class="fn-left">Github</a>
     <a href="/about/" id="link-aboutme" class="fn-left">About</a>
   </nav>
@@ -57,7 +58,7 @@
 <div id="main">
 <style>
 article {
-  margin:30px auto 0;
+  margin:70px auto 0;
   color:#666;
 }
 article h1 {
@@ -95,7 +96,7 @@ article p code {
   color: white;
 }
 </style>
-<article>
+<article >
   <h1>jQuery Event 源码学习</h1>
   <p>众所周知，jQuery 通过jQuery.event.add &amp; jQuery.event.remove 方法对DOM元素(文本和注释节点除外)进行事件的绑定和解绑。这两个方法都提供了四个参数，前三个参数elem, types, handler 是必选的，最后一个为可选参数分别是data和pos。</p>
 

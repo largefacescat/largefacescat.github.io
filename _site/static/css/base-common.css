@@ -6,9 +6,7 @@
 */
 
 /* 防止用户自定义背景颜色对网页的影响 */
-html{
-	color:#000;background:#fff;
-}
+
 
 /* 内外边距通常让各个浏览器样式的表现位置不同 */
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td,hr,button,article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
@@ -20,6 +18,19 @@ article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
     display:block;
 }
 
+body {margin:0; padding:0 10px 0 10px; border:0;  background: #e2e2e2 repeat; } 
+#menu {right:0; 
+  top:0; 
+  width:100%; 
+  position:fixed; 
+  padding:6px; 
+  text-align:center; 
+  font-weight:bold; 
+  background-color:-moz-linear-gradient(center top , rgb(11,165,126), rgb(59,219,172)) repeat scroll 0% 0% rgb(11,165,126);
+  -moz-opacity:0.7; /* Moz + FF 透明度20%*/
+  opacity: 0.7;}
+* html #menu {position:absolute; right:16px; top:0;}
+html {overflow:auto !important; overflow:hidden;  color:#000;}
 /* 要注意表单元素并不继承父级 font 的问题 */
 body,button,input,select,textarea{
 	font:13px/1.5 tahoma,arial,\5b8b\4f53;
@@ -125,6 +136,7 @@ body .fn-hide {
 }
 .fn-left {
 	float:left;
+	font-size:16px;
 }
 .fn-right {
 	float:right;
@@ -148,7 +160,6 @@ body .fn-hide {
 body {
   font-family:Calibri, "微软雅黑", "宋体";
   color:#333;
-  background:url("/static/images/hexBackground.png") repeat top left, url("/static/images/hexBackground_2.png") repeat 0px 20px;
 }
 a {
   color:#333;
@@ -159,22 +170,29 @@ a:hover {
   text-decoration:underline;
 }
 nav,
-footer p,
-#main {
-  width:90%;
+footer p{
+  width:72%;
   max-width:960px;
   margin:0 auto;
 }
+#main {
+  width:90%;
+  max-width:980px;
+  margin:-28px auto;
+  height:auto !important; 
+  min-height: 300px;
+}
 header{
   height:32px;
-  background:#333;
   color:white;
   line-height:32px;
+  background: -moz-linear-gradient(center top , rgb(36,115,169), rgb(20,74,123)) repeat scroll 0% 0% rgb(34,90,53);
 }
 nav a {
   margin:0 10px;
   font-size:100%;
-  color:white;
+  color:#97c6d9;
+  overflow: hidden;
 }
 nav a:hover {
   color:#efefef;
@@ -184,6 +202,7 @@ nav a:hover {
 footer{
 display:block;
 border-top: 1px dashed #CCC;
+margin-top: 30px;
 }
 footer small {
 font-size: 13px;
@@ -242,4 +261,17 @@ nav #logo {
   font-size:16px;
   line-height:1.6;
   color:#A10000;
+}
+.container{
+   margin: 70px auto;
+}
+.topNav{
+	float: left; 
+	display: block; 
+	z-index: 100; 
+	width: 970px;
+	overflow: visible; 
+	position: fixed;
+	_position: absolute; 
+	_top: expression(documentElement.scrollTop + "px"); 
 }
