@@ -5,11 +5,19 @@ layout: default
 <style>
 
 </style>
-<section id="article" class="container">
-  <h2>Article</h2>
-  <ul>
+    <section id="article" class="list container">
+    <ul>
+    <h4 class="title">Article</h4>
     {% for post in site.posts %}
-      <li><time datetime="{{ post.date | date: "%Y-%m-%d" }}">{{ post.date | date_to_string }}</time> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+    {% capture y %}{{post.date | date:"%Y"}}{% endcapture %}
+    {% if year != y %}
+    {% assign year = y %}
+    <li class="listing-seperator">{{ y }}</li>
+    {% endif %}
+    <li class="listing-item">
+    <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
+    <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+    </li>
     {% endfor %}
-  </ul>
-</section>
+    </ul>
+  </section>

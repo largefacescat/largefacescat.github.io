@@ -13,7 +13,6 @@ h2 {
   padding: 20px auto;
 }
 #article ul{
-
   margin:0 2em;
 }
 #article time {
@@ -52,4 +51,21 @@ h2 {
 .index_pic_top{
   height:300px;
   background-repeat: no-repeat;
+}
+.listing-seperator{
+  font-size: 18px;
+  color: #990000;
+}
+.listing-item{
+  font-size: 14px;
+    line-height:1.8;
+}
+.list .title{
+  border-bottom: 1px dashed #CCC;
+
+}
+.list h4{
+  font-size: 26px;
+  font-weight: bold;
+  color: #006666;
 }
