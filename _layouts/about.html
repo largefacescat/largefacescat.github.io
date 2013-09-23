@@ -11,13 +11,11 @@ h2 {
   padding:40px 20px 20px 20px;
 }
 </style>
-<section class="about list container">
-<h4>{{ page.title }}</h4>
+<section class="list container">
+<ul>
+<h4 class="title">{{ page.title }}</h4>
 {{ content }}
 
 <a href="http://weibo.com/u/2464071124?s=6uyXnP" target="_blank"><img border="0" src="http://service.t.sina.com.cn/widget/qmd/2464071124/aad42972/1.png"/></a>
+</ul>
 </section>
-{% if page.comments %}
-{% include comments.md %}
-{% endif %}
-

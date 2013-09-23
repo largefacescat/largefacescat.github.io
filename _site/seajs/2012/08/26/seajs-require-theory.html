@@ -1,0 +1,240 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta charset="utf-8">
+<title>seajs模块依赖的加载处理</title>
+
+<meta name="description" content="比如执行init.js时，init.js、jquery.plugA.js、jquery.plugB.js都会依赖到jquery，那么这种情况下seajs对jquery如何处理的呢？只执行一次？执行多次？还是其他方式？" />
+
+
+<link rel="stylesheet" href="/static/css/base-common.css" />
+<link rel="stylesheet" href="/static/css/largefacescat.css" />
+
+
+<link rel="stylesheet" href="/static/css/syntax.css" />
+
+
+<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
+<!--[if lt IE 9]>
+<script src="/static/js/html5.js"></script>
+<![endif]-->
+  <script type="text/javascript">
+    function setTimeSpan(){
+    	var date = new Date();
+    	timeSpan.innerText=date.format('yyyy-MM-dd hh:mm:ss');
+    }
+    
+    Date.prototype.format = function(format)
+		{
+    var o =
+    	{
+    	    "M+" : this.getMonth()+1, //month
+    	    "d+" : this.getDate(),    //day
+    	    "h+" : this.getHours(),   //hour
+    	    "m+" : this.getMinutes(), //minute
+    	    "s+" : this.getSeconds(), //second
+    	    "q+" : Math.floor((this.getMonth()+3)/3),  //quarter
+    	    "S" : this.getMilliseconds() //millisecond
+    	}
+    	if(/(y+)/.test(format))
+    	format=format.replace(RegExp.$1,(this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    	for(var k in o)
+    	if(new RegExp("("+ k +")").test(format))
+    	format = format.replace(RegExp.$1,RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
+    	return format;
+		}
+  </script>
+</head>
+ 
+  <body onLoad="setInterval(setTimeSpan,1000);">
+<header id="menu">
+  <nav class="fn-clear">
+    <a href="/" id="logo" class="fn-left">Largefacescat</a>
+    <a href="/article/" id="link-article" class="fn-left">Article</a>
+    <a href="/categories/" id="link-categories" class="fn-left">Categories</a>
+    <a href="/tags/" id="link-tags" class="fn-left">Tags</a>
+    <a href="https://github.com/largefacescat" class="fn-left">Github</a>
+    <a href="/about/" id="link-aboutme" class="fn-left">About</a>
+  </nav>
+</header>
+<div id="main">
+<style>
+article {
+  margin: 70px auto;
+  background: #fff;
+  color:#666;
+  padding: 10px 10px 0px 10px;
+}
+article h1 {
+  text-align:center;
+  font-size:26px;
+  font-weight:bold;
+  line-height:2;
+  color:black;
+}
+article h2 {
+  font-weight:bold;
+  line-height:2;
+  color:black;
+  font-size:20px;
+  margin-top:10px;
+}
+article p {
+  margin:12px 0;
+  text-indent:2em;
+  font-size:14px;
+  line-height:1.8;
+}
+article p b {
+  font-weight:bold;
+  color:#333;
+}
+article ol {
+  list-style:decimal;
+  margin-left:25px;
+  font-size:16px;
+  line-height:1.6;
+}
+article p code {
+  background:#333;
+  color: white;
+}
+</style>
+<article >
+  <h1>seajs模块依赖的加载处理</h1>
+  <h3>seajs模块依赖问题</h3>
+
+<p>最近在做项目的时候发现一些关于模块依赖问题，特记录下:</p>
+
+<p>比如现有3个文件：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno"> 1</span>     <span class="cm">/*init.js*/</span>
+<span class="lineno"> 2</span>  <span class="nx">define</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">){</span>
+<span class="lineno"> 3</span>      <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;jquery&#39;</span><span class="p">);</span>
+<span class="lineno"> 4</span>      <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;jquery.plugA&#39;</span><span class="p">);</span>
+<span class="lineno"> 5</span>  <span class="p">})</span>
+<span class="lineno"> 6</span>  
+<span class="lineno"> 7</span>  <span class="cm">/*jquery.plugA.js*/</span>
+<span class="lineno"> 8</span>  <span class="nx">define</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">){</span>
+<span class="lineno"> 9</span>      <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;jquery&#39;</span><span class="p">);</span>
+<span class="lineno">10</span>      <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;jquery.plugB&#39;</span><span class="p">);</span>
+<span class="lineno">11</span>      <span class="c1">//code...</span>
+<span class="lineno">12</span>  <span class="p">})</span>
+<span class="lineno">13</span>  
+<span class="lineno">14</span>  <span class="cm">/*jquery.plugB.js*/</span>
+<span class="lineno">15</span>  <span class="nx">define</span><span class="p">(</span><span class="nx">functioin</span><span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">){</span>
+<span class="lineno">16</span>      <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;jquery&#39;</span><span class="p">);</span>
+<span class="lineno">17</span>      <span class="c1">//code...</span>
+<span class="lineno">18</span>  <span class="p">})</span>
+</code></pre></div>
+
+
+<p>比如执行init.js时，init.js、jquery.plugA.js、jquery.plugB.js都会依赖到jquery，那么这种情况下seajs对jquery如何处理的呢？只执行一次？执行多次？还是其他方式？</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno"> 1</span> <span class="c1">//给id元素绑定两个单击和一个鼠标离开事件 </span>
+<span class="lineno"> 2</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#id&#39;</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;once&#39;</span><span class="p">);</span> <span class="p">});</span> 
+<span class="lineno"> 3</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#id&#39;</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">);</span> <span class="p">});</span> 
+<span class="lineno"> 4</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#id&#39;</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;mouseout&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span> <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;mouseout&#39;</span><span class="p">);</span> <span class="p">});</span>
+<span class="lineno"> 5</span> 
+<span class="lineno"> 6</span> <span class="c1">//events对象的值 </span>
+<span class="lineno"> 7</span> <span class="p">{</span> 
+<span class="lineno"> 8</span>   <span class="s1">&#39;click&#39;</span><span class="o">:</span> <span class="p">[</span> 
+<span class="lineno"> 9</span>     <span class="p">{</span><span class="c1">// 此对象还有:data,guid,namespace属性 </span>
+<span class="lineno">10</span>       <span class="nx">handler</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;once&#39;</span><span class="p">);</span> <span class="p">},</span> 
+<span class="lineno">11</span>       <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;click&#39;</span> 
+<span class="lineno">12</span>     <span class="p">},</span> 
+<span class="lineno">13</span>     <span class="p">{</span> 
+<span class="lineno">14</span>       <span class="nx">handler</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">);</span> <span class="p">},</span> 
+<span class="lineno">15</span>       <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;click&#39;</span> 
+<span class="lineno">16</span>     <span class="p">}</span> 
+<span class="lineno">17</span>   <span class="p">],</span> 
+<span class="lineno">18</span>   <span class="s1">&#39;mouseout&#39;</span><span class="o">:</span> <span class="p">[</span> 
+<span class="lineno">19</span>     <span class="p">{</span> 
+<span class="lineno">20</span>       <span class="nx">handler</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;mouseover&#39;</span><span class="p">);</span> <span class="p">},</span> 
+<span class="lineno">21</span>       <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;mouseout&#39;</span> 
+<span class="lineno">22</span>     <span class="p">}</span> 
+<span class="lineno">23</span>   <span class="p">]</span> 
+<span class="lineno">24</span> <span class="p">}</span>
+</code></pre></div>
+
+
+<p>此处参考玉伯的回答：</p>
+
+<blockquote><p>我对模块调用的理解是，调用是指获取某个模块的接口。在 SeaJS 里，只有 seajs.use, require.async, 和 require 会产生
+模块调用，比如：
+<code>var a = require('./a')</code>
+在执行 require('./a') 时，会获取模块的接口，如果是第一次调用，会初始化模块 a，以后再调用时，直接返回模块 a 的接口
+define 只是注册模块信息，比如打包之后：
+<code>define(id, deps, factory)</code>
+是注册了一个模块到 seajs.cache 中，define 类似：
+<code>seajs.cache[id] = { id: id, dependencies: deps, factory: factory }</code></p>
+
+<p>是纯注册信息。</p>
+
+<p>而 <code>require('./a')</code> 时，才会执行 <code>seajs.cache['a'].factory</code>, 执行后得到 <code>seajs.cache['a'].exports</code></p></blockquote>
+
+<h3>扩展：URI与URL的区别</h3>
+
+<pre>
+
+URI:Uniform Resource Identifiers ，统一资源标识符；
+
+URL:Uniform Resource Locators ，统一资源定位符；
+
+URN:Uniform Resource Names，统一资源名称
+
+URL,URN是URI的子集.
+</pre>
+
+
+<h3>参考</h3>
+
+<ul>
+<li>Module.STATUS的具体含义：<a href="https://github.com/seajs/seajs/issues/303">https://github.com/seajs/seajs/issues/303</a></li>
+<li>分清 URI、URL 和 URN<a href="http://www.ibm.com/developerworks/cn/xml/x-urlni.html">http://www.ibm.com/developerworks/cn/xml/x-urlni.html</a></li>
+</ul>
+
+
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+  <div class="ds-thread"></div>
+  <script type="text/javascript">
+  var duoshuoQuery = {short_name:"largefacescat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- Duoshuo Comment END -->
+</div>
+
+    <footer>
+        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - 2013 by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
+    </footer>
+
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-23358884-1']);
+_gaq.push(['_trackPageview']);
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+</script>
+    <!-- Baidu Button BEGIN -->
+    <script type="text/javascript" id="bdshare_js" data="type=slide&amp;img=4&amp;pos=right&amp;uid=541841" ></script>
+    <script type="text/javascript" id="bdshell_js"></script>
+    <script type="text/javascript">
+    var bds_config={"bdTop":170};
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
+    </script>
+    <!-- Baidu Button END -->
+</body> 
+</html>
