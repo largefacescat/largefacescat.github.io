@@ -3,8 +3,8 @@ layout: post
 title : seajs模块依赖的加载处理
 styles: [syntax]
 description : 比如执行init.js时，init.js、jquery.plugA.js、jquery.plugB.js都会依赖到jquery，那么这种情况下seajs对jquery如何处理的呢？只执行一次？执行多次？还是其他方式？
-category : seajs
-tags : [seajs, 依赖, 模块, 原理, 异步加载, cache, 接口]
+category : 前端
+tags : [javaScript]
 ---
 {% include JB/setup %}
 
