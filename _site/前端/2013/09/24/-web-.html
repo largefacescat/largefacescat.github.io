@@ -551,140 +551,193 @@ JavaScript 的更高级功能之一是它支持闭包，这是 C# 2.0 通过它�
 
 <h2>模拟私有属性</h2>
 
-<p>现在介绍闭包如何帮助模拟私有成员。正常情况下，无法从函数以外访问函数内的本地变量。函数退出之后，由于各种实际原因，该本地变量将永远消失。但是，如果该本地变量被内部函数的闭包捕获，它就会生存下来。这一事实是模拟 JavaScript 私有属性的关键。假设有一个 Person 类：
- function Person(name, age) {
-    this.getName = function() { return name; };
-    this.setName = function(newName) { name = newName; };
-    this.getAge = function() { return age; };
-    this.setAge = function(newAge) { age = newAge; };
-}
-参数 name 和 age 是构造函数 Person 的本地变量。Person 返回时，name 和 age 应当永远消失。但是，它们被作为 Person 实例的方法而分配的四个内部函数捕获，实际上这会使 name 和 age 继续存在，但只能严格地通过这四个方法访问它们。因此，您可以：
- var ray = new Person(“Ray”, 31);
-alert(ray.getName());
-alert(ray.getAge());
-ray.setName(“Younger Ray”);
-// Instant rejuvenation!
-ray.setAge(22);
-alert(ray.getName() + “ is now “ + ray.getAge() +
-      “ years old.”);
-未在构造函数中初始化的私有成员可以成为构造函数的本地变量，如下所示：
- function Person(name, age) {
-    var occupation;
-    this.getOccupation = function() { return occupation; };
-    this.setOccupation = function(newOcc) { occupation =
-                         newOcc; };</p>
+<p>现在介绍闭包如何帮助模拟私有成员。正常情况下，无法从函数以外访问函数内的本地变量。函数退出之后，由于各种实际原因，该本地变量将永远消失。但是，如果该本地变量被内部函数的闭包捕获，它就会生存下来。这一事实是模拟 JavaScript 私有属性的关键。假设有一个 Person 类：</p>
 
-<pre><code>// accessors for name and age    
-</code></pre>
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="kd">function</span> <span class="nx">Person</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span> <span class="p">{</span>
+<span class="lineno">2</span>     <span class="k">this</span><span class="p">.</span><span class="nx">getName</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">name</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno">3</span>     <span class="k">this</span><span class="p">.</span><span class="nx">setName</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newName</span><span class="p">)</span> <span class="p">{</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">newName</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno">4</span>     <span class="k">this</span><span class="p">.</span><span class="nx">getAge</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">age</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno">5</span>     <span class="k">this</span><span class="p">.</span><span class="nx">setAge</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newAge</span><span class="p">)</span> <span class="p">{</span> <span class="nx">age</span> <span class="o">=</span> <span class="nx">newAge</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno">6</span> <span class="p">}</span>
+<span class="lineno">7</span>                   
+</code></pre></div>
 
-<p>}
-注意，这些私有成员与我们期望从 C# 中产生的私有成员略有不同。在 C# 中，类的公用方法可以访问它的私有成员。但在 JavaScript 中，只能通过在其闭包内拥有这些私有成员的方法来访问私有成员（由于这些方法不同于普通的公用方法，它们通常被称为特权方法）。因此，在 Person 的公用方法中，仍然必须通过私有成员的特权访问器方法才能访问私有成员：
- Person.prototype.somePublicMethod = function() {
-    // doesn’t work!
-    // alert(this.name);
-    // this one below works
-    alert(this.getName());
-};
-Douglas Crockford 是著名的发现（或者也许是发布）使用闭包来模拟私有成员这一技术的第一人。他的网站 javascript.crockford.com 包含有关 JavaScript 的丰富信息，任何对 JavaScript 感兴趣的开发人员都应当仔细研读。</p>
 
-<p>从类继承
-到这里，我们已经了解了构造函数和原型对象如何使您在 JavaScript 中模拟类。您已经看到，原型链可以确保所有对象都有 Object.prototype 的公用方法，以及如何使用闭包来模拟类的私有成员。但这里还缺少点什么。您尚未看到如何从类派生，这在 C# 中是每天必做的工作。遗憾的是，在 JavaScript 中从类继承并非像在 C# 中键入冒号即可继承那样简单，它需要进行更多操作。另一方面，JavaScript 非常灵活，可以有很多从类继承的方式。
+<p>参数 name 和 age 是构造函数 Person 的本地变量。Person 返回时，name 和 age 应当永远消失。但是，它们被作为 Person 实例的方法而分配的四个内部函数捕获，实际上这会使 name 和 age 继续存在，但只能严格地通过这四个方法访问它们。因此，您可以：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="kd">var</span> <span class="nx">ray</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Person</span><span class="p">(</span><span class="err">“</span><span class="nx">Ray</span><span class="err">”</span><span class="p">,</span> <span class="mi">31</span><span class="p">);</span>
+<span class="lineno">2</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">ray</span><span class="p">.</span><span class="nx">getName</span><span class="p">());</span>
+<span class="lineno">3</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">ray</span><span class="p">.</span><span class="nx">getAge</span><span class="p">());</span>
+<span class="lineno">4</span> <span class="nx">ray</span><span class="p">.</span><span class="nx">setName</span><span class="p">(</span><span class="err">“</span><span class="nx">Younger</span> <span class="nx">Ray</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">5</span> <span class="c1">// Instant rejuvenation!</span>
+<span class="lineno">6</span> <span class="nx">ray</span><span class="p">.</span><span class="nx">setAge</span><span class="p">(</span><span class="mi">22</span><span class="p">);</span>
+<span class="lineno">7</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">ray</span><span class="p">.</span><span class="nx">getName</span><span class="p">()</span> <span class="o">+</span> <span class="err">“</span> <span class="nx">is</span> <span class="nx">now</span> <span class="err">“</span> <span class="o">+</span> <span class="nx">ray</span><span class="p">.</span><span class="nx">getAge</span><span class="p">()</span> <span class="o">+</span> 
+<span class="lineno">8</span>       <span class="err">“</span> <span class="nx">years</span> <span class="nx">old</span><span class="p">.</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">9</span>       
+</code></pre></div>
+
+
+<p>未在构造函数中初始化的私有成员可以成为构造函数的本地变量，如下所示：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="kd">function</span> <span class="nx">Person</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span> <span class="p">{</span>
+<span class="lineno">2</span>     <span class="kd">var</span> <span class="nx">occupation</span><span class="p">;</span>
+<span class="lineno">3</span>     <span class="k">this</span><span class="p">.</span><span class="nx">getOccupation</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">occupation</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno">4</span>     <span class="k">this</span><span class="p">.</span><span class="nx">setOccupation</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newOcc</span><span class="p">)</span> <span class="p">{</span> <span class="nx">occupation</span> <span class="o">=</span> 
+<span class="lineno">5</span>                          <span class="nx">newOcc</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno">6</span>   
+<span class="lineno">7</span>     <span class="c1">// accessors for name and age    </span>
+<span class="lineno">8</span> <span class="p">}</span>
+<span class="lineno">9</span>  
+</code></pre></div>
+
+
+<p>注意，这些私有成员与我们期望从 C# 中产生的私有成员略有不同。在 C# 中，类的公用方法可以访问它的私有成员。但在 JavaScript 中，只能通过在其闭包内拥有这些私有成员的方法来访问私有成员（由于这些方法不同于普通的公用方法，它们通常被称为特权方法）。因此，在 Person 的公用方法中，仍然必须通过私有成员的特权访问器方法才能访问私有成员：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="nx">Person</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">somePublicMethod</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="lineno">2</span>     <span class="c1">// doesn’t work!</span>
+<span class="lineno">3</span>     <span class="c1">// alert(this.name);</span>
+<span class="lineno">4</span>     <span class="c1">// this one below works</span>
+<span class="lineno">5</span>     <span class="nx">alert</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">getName</span><span class="p">());</span>
+<span class="lineno">6</span> <span class="p">};</span>
+<span class="lineno">7</span>                
+</code></pre></div>
+
+
+<p>Douglas Crockford 是著名的发现（或者也许是发布）使用闭包来模拟私有成员这一技术的第一人。他的网站 javascript.crockford.com 包含有关 JavaScript 的丰富信息，任何对 JavaScript 感兴趣的开发人员都应当仔细研读。</p>
+
+<h2>从类继承</h2>
+
+<p>到这里，我们已经了解了构造函数和原型对象如何使您在 JavaScript 中模拟类。您已经看到，原型链可以确保所有对象都有 Object.prototype 的公用方法，以及如何使用闭包来模拟类的私有成员。但这里还缺少点什么。您尚未看到如何从类派生，这在 C# 中是每天必做的工作。遗憾的是，在 JavaScript 中从类继承并非像在 C# 中键入冒号即可继承那样简单，它需要进行更多操作。另一方面，JavaScript 非常灵活，可以有很多从类继承的方式。
 例如，有一个基类 Pet，它有一个派生类 Dog，如图 9 所示。这个在 JavaScript 中如何实现呢？Pet 类很容易。您已经看见如何实现它了：</p>
 
-<p>图 9 类
- // class Pet
-function Pet(name) {
-    this.getName = function() { return name; };
-    this.setName = function(newName) { name = newName; };
-}</p>
+<p><img src="http://i.msdn.microsoft.com/cc163419.fig09(zh-cn).gif" alt="" /></p>
 
-<p>Pet.prototype.toString = function() {
-    return “This pet’s name is: “ + this.getName();
-};
-// end of class Pet</p>
+<h3>图 9 类</h3>
 
-<p>var parrotty = new Pet(“Parrotty the Parrot”);
-alert(parrotty);
-现在，如何创建从 Pet 派生的类 Dog 呢？在图 9 中可以看到，Dog 有另一个属性 breed，它改写了 Pet 的 toString 方法（注意，JavaScript 的约定是方法和属性名称使用 camel 大小写，而不是在 C# 中建议的 Pascal 大小写）。图 10 显示如何这样做。
-   Figure 10 从 Pet 类派生
- // class Dog : Pet
-// public Dog(string name, string breed)
-function Dog(name, breed) {
-    // think Dog : base(name)
-    Pet.call(this, name);
-    this.getBreed = function() { return breed; };
-    // Breed doesn’t change, obviously! It’s read only.
-    // this.setBreed = function(newBreed) { name = newName; };
-}</p>
+<div class="highlight"><pre><code class="javascript"><span class="lineno"> 1</span>  <span class="c1">// class Pet</span>
+<span class="lineno"> 2</span> <span class="kd">function</span> <span class="nx">Pet</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+<span class="lineno"> 3</span>     <span class="k">this</span><span class="p">.</span><span class="nx">getName</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">name</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno"> 4</span>     <span class="k">this</span><span class="p">.</span><span class="nx">setName</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newName</span><span class="p">)</span> <span class="p">{</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">newName</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno"> 5</span> <span class="p">}</span>
+<span class="lineno"> 6</span> 
+<span class="lineno"> 7</span> <span class="nx">Pet</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="lineno"> 8</span>     <span class="k">return</span> <span class="err">“</span><span class="nx">This</span> <span class="nx">pet</span><span class="err">’</span><span class="nx">s</span> <span class="nx">name</span> <span class="nx">is</span><span class="o">:</span> <span class="err">“</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">getName</span><span class="p">();</span>
+<span class="lineno"> 9</span> <span class="p">};</span>
+<span class="lineno">10</span> <span class="c1">// end of class Pet</span>
+<span class="lineno">11</span> 
+<span class="lineno">12</span> <span class="kd">var</span> <span class="nx">parrotty</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Pet</span><span class="p">(</span><span class="err">“</span><span class="nx">Parrotty</span> <span class="nx">the</span> <span class="nx">Parrot</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">13</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">parrotty</span><span class="p">);</span>
+<span class="lineno">14</span>               
+</code></pre></div>
 
-<p>// this makes Dog.prototype inherits
-// from Pet.prototype
-Dog.prototype = new Pet();</p>
 
-<p>// remember that Pet.prototype.constructor
-// points to Pet. We want our Dog instances’
-// constructor to point to Dog.
-Dog.prototype.constructor = Dog;</p>
+<p>现在，如何创建从 Pet 派生的类 Dog 呢？在图 9 中可以看到，Dog 有另一个属性 breed，它改写了 Pet 的 toString 方法（注意，JavaScript 的约定是方法和属性名称使用 camel 大小写，而不是在 C# 中建议的 Pascal 大小写）。图 10 显示如何这样做。
+   Figure 10 从 Pet 类派生</p>
 
-<p>// Now we override Pet.prototype.toString
-Dog.prototype.toString = function() {
-    return “This dog’s name is: “ + this.getName() +
-        “, and its breed is: “ + this.getBreed();
-};
-// end of class Dog</p>
+<div class="highlight"><pre><code class="javascript"><span class="lineno"> 1</span>  <span class="c1">// class Dog : Pet </span>
+<span class="lineno"> 2</span> <span class="c1">// public Dog(string name, string breed)</span>
+<span class="lineno"> 3</span> <span class="kd">function</span> <span class="nx">Dog</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">breed</span><span class="p">)</span> <span class="p">{</span>
+<span class="lineno"> 4</span>     <span class="c1">// think Dog : base(name) </span>
+<span class="lineno"> 5</span>     <span class="nx">Pet</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">name</span><span class="p">);</span>
+<span class="lineno"> 6</span>     <span class="k">this</span><span class="p">.</span><span class="nx">getBreed</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">breed</span><span class="p">;</span> <span class="p">};</span>
+<span class="lineno"> 7</span>     <span class="c1">// Breed doesn’t change, obviously! It’s read only.</span>
+<span class="lineno"> 8</span>     <span class="c1">// this.setBreed = function(newBreed) { name = newName; };</span>
+<span class="lineno"> 9</span> <span class="p">}</span>
+<span class="lineno">10</span> 
+<span class="lineno">11</span> <span class="c1">// this makes Dog.prototype inherits</span>
+<span class="lineno">12</span> <span class="c1">// from Pet.prototype</span>
+<span class="lineno">13</span> <span class="nx">Dog</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Pet</span><span class="p">();</span>
+<span class="lineno">14</span> 
+<span class="lineno">15</span> <span class="c1">// remember that Pet.prototype.constructor</span>
+<span class="lineno">16</span> <span class="c1">// points to Pet. We want our Dog instances’</span>
+<span class="lineno">17</span> <span class="c1">// constructor to point to Dog.</span>
+<span class="lineno">18</span> <span class="nx">Dog</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="nx">Dog</span><span class="p">;</span>
+<span class="lineno">19</span> 
+<span class="lineno">20</span> <span class="c1">// Now we override Pet.prototype.toString</span>
+<span class="lineno">21</span> <span class="nx">Dog</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="lineno">22</span>     <span class="k">return</span> <span class="err">“</span><span class="nx">This</span> <span class="nx">dog</span><span class="err">’</span><span class="nx">s</span> <span class="nx">name</span> <span class="nx">is</span><span class="o">:</span> <span class="err">“</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">getName</span><span class="p">()</span> <span class="o">+</span> 
+<span class="lineno">23</span>         <span class="err">“</span><span class="p">,</span> <span class="nx">and</span> <span class="nx">its</span> <span class="nx">breed</span> <span class="nx">is</span><span class="o">:</span> <span class="err">“</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">getBreed</span><span class="p">();</span>
+<span class="lineno">24</span> <span class="p">};</span>
+<span class="lineno">25</span> <span class="c1">// end of class Dog</span>
+<span class="lineno">26</span> 
+<span class="lineno">27</span> <span class="kd">var</span> <span class="nx">dog</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Dog</span><span class="p">(</span><span class="err">“</span><span class="nx">Buddy</span><span class="err">”</span><span class="p">,</span> <span class="err">“</span><span class="nx">Great</span> <span class="nx">Dane</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">28</span> <span class="c1">// test the new toString()</span>
+<span class="lineno">29</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">dog</span><span class="p">);</span>
+<span class="lineno">30</span> 
+<span class="lineno">31</span> <span class="c1">// Testing instanceof (similar to the is operator)</span>
+<span class="lineno">32</span> <span class="c1">// (dog is Dog)? yes</span>
+<span class="lineno">33</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">dog</span> <span class="k">instanceof</span> <span class="nx">Dog</span><span class="p">);</span>
+<span class="lineno">34</span> <span class="c1">// (dog is Pet)? yes</span>
+<span class="lineno">35</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">dog</span> <span class="k">instanceof</span> <span class="nx">Pet</span><span class="p">);</span>
+<span class="lineno">36</span> <span class="c1">// (dog is Object)? yes</span>
+<span class="lineno">37</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">dog</span> <span class="k">instanceof</span> <span class="nb">Object</span><span class="p">);</span>
+<span class="lineno">38</span>               
+</code></pre></div>
 
-<p>var dog = new Dog(“Buddy”, “Great Dane”);
-// test the new toString()
-alert(dog);</p>
 
-<p>// Testing instanceof (similar to the is operator)
-// (dog is Dog)? yes
-alert(dog instanceof Dog);
-// (dog is Pet)? yes
-alert(dog instanceof Pet);
-// (dog is Object)? yes
-alert(dog instanceof Object);
-所使用的原型 — 替换技巧正确设置了原型链，因此假如使用 C#，测试的实例将按预期运行。而且，特权方法仍然会按预期运行。</p>
+<p>所使用的原型 — 替换技巧正确设置了原型链，因此假如使用 C#，测试的实例将按预期运行。而且，特权方法仍然会按预期运行。</p>
 
-<p>模拟命名空间
-在 C++ 和 C# 中，命名空间用于尽可能地减少名称冲突。例如，在 .NET Framework 中，命名空间有助于将 Microsoft.Build.Task.Message 类与 System.Messaging.Message 区分开来。JavaScript 没有任何特定语言功能来支持命名空间，但很容易使用对象来模拟命名空间。如果要创建一个 JavaScript 库，则可以将它们包装在命名空间内，而不需要定义全局函数和类，如下所示：
- var MSDNMagNS = {};</p>
+<h2>模拟命名空间</h2>
 
-<p>MSDNMagNS.Pet = function(name) { // code here };
-MSDNMagNS.Pet.prototype.toString = function() { // code };</p>
+<p>在 C++ 和 C# 中，命名空间用于尽可能地减少名称冲突。例如，在 .NET Framework 中，命名空间有助于将 Microsoft.Build.Task.Message 类与 System.Messaging.Message 区分开来。JavaScript 没有任何特定语言功能来支持命名空间，但很容易使用对象来模拟命名空间。如果要创建一个 JavaScript 库，则可以将它们包装在命名空间内，而不需要定义全局函数和类，如下所示：</p>
 
-<p>var pet = new MSDNMagNS.Pet(“Yammer”);
-命名空间的一个级别可能不是唯一的，因此可以创建嵌套的命名空间：
- var MSDNMagNS = {};
-// nested namespace “Examples”
-MSDNMagNS.Examples = {};</p>
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="kd">var</span> <span class="nx">MSDNMagNS</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="lineno">2</span> 
+<span class="lineno">3</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Pet</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// code here };</span>
+<span class="lineno">4</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Pet</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// code };</span>
+<span class="lineno">5</span> 
+<span class="lineno">6</span> <span class="kd">var</span> <span class="nx">pet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Pet</span><span class="p">(</span><span class="err">“</span><span class="nx">Yammer</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">7</span>                
+</code></pre></div>
 
-<p>MSDNMagNS.Examples.Pet = function(name) { // code };
-MSDNMagNS.Examples.Pet.prototype.toString = function() { // code };</p>
 
-<p>var pet = new MSDNMagNS.Examples.Pet(“Yammer”);
-可以想象，键入这些冗长的嵌套命名空间会让人很累。 幸运的是，库用户可以很容易地为命名空间指定更短的别名：
- // MSDNMagNS.Examples and Pet definition...</p>
+<p>命名空间的一个级别可能不是唯一的，因此可以创建嵌套的命名空间：</p>
 
-<p>// think “using Eg = MSDNMagNS.Examples;”
-var Eg = MSDNMagNS.Examples;
-var pet = new Eg.Pet(“Yammer”);
-alert(pet);
-如果看一下 Microsoft AJAX 库的源代码，就会发现库的作者使用了类似的技术来实现命名空间（请参阅静态方法 Type.registerNamespace 的实现）。有关详细信息，请参与侧栏“OOP 和 ASP.NET AJAX”。</p>
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="kd">var</span> <span class="nx">MSDNMagNS</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="lineno">2</span> <span class="c1">// nested namespace “Examples”</span>
+<span class="lineno">3</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Examples</span> <span class="o">=</span> <span class="p">{};</span> 
+<span class="lineno">4</span> 
+<span class="lineno">5</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Examples</span><span class="p">.</span><span class="nx">Pet</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// code };</span>
+<span class="lineno">6</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Examples</span><span class="p">.</span><span class="nx">Pet</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// code };</span>
+<span class="lineno">7</span> 
+<span class="lineno">8</span> <span class="kd">var</span> <span class="nx">pet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Examples</span><span class="p">.</span><span class="nx">Pet</span><span class="p">(</span><span class="err">“</span><span class="nx">Yammer</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">9</span>                
+</code></pre></div>
 
-<p>应当这样编写 JavaScript 代码吗？
-您已经看见 JavaScript 可以很好地支持面向对象的编程。尽管它是一种基于原型的语言，但它的灵活性和强大功能可以满足在其他流行语言中常见的基于类的编程风格。但问题是：是否应当这样编写 JavaScript 代码？在 JavaScript 中的编程方式是否应与 C# 或 C++ 中的编码方式相同？是否有更聪明的方式来模拟 JavaScript 中没有的功能？每种编程语言都各不相同，一种语言的最佳做法，对另一种语言而言则可能并非最佳。
-在 JavaScript 中，您已看到对象继承对象（与类继承类不同）。因此，使用静态继承层次结构建立很多类的方式可能并不适合 JavaScript。也许，就像 Douglas Crockford 在他的文章 Prototypal Inheritance in JavaScript 中说的那样，JavaScript 编程方式是建立原型对象，并使用下面的简单对象函数建立新的对象，而后者则继承原始对象：
-     function object(o) {
-        function F() {}
-        F.prototype = o;
-        return new F();
-    }
-然后，由于 JavaScript 中的对象是可延展的，因此可以方便地在创建对象之后，根据需要用新字段和新方法增大对象。
+
+<p>可以想象，键入这些冗长的嵌套命名空间会让人很累。 幸运的是，库用户可以很容易地为命名空间指定更短的别名：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>  <span class="c1">// MSDNMagNS.Examples and Pet definition...</span>
+<span class="lineno">2</span> <span class="c1">// think “using Eg = MSDNMagNS.Examples;” </span>
+<span class="lineno">3</span> <span class="kd">var</span> <span class="nx">Eg</span> <span class="o">=</span> <span class="nx">MSDNMagNS</span><span class="p">.</span><span class="nx">Examples</span><span class="p">;</span>
+<span class="lineno">4</span> <span class="kd">var</span> <span class="nx">pet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Eg</span><span class="p">.</span><span class="nx">Pet</span><span class="p">(</span><span class="err">“</span><span class="nx">Yammer</span><span class="err">”</span><span class="p">);</span>
+<span class="lineno">5</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">pet</span><span class="p">);</span>
+<span class="lineno">6</span>                   
+</code></pre></div>
+
+
+<p>如果看一下 Microsoft AJAX 库的源代码，就会发现库的作者使用了类似的技术来实现命名空间（请参阅静态方法 Type.registerNamespace 的实现）。有关详细信息，请参与侧栏“OOP 和 ASP.NET AJAX”。</p>
+
+<h2>应当这样编写 JavaScript 代码吗？</h2>
+
+<p>您已经看见 JavaScript 可以很好地支持面向对象的编程。尽管它是一种基于原型的语言，但它的灵活性和强大功能可以满足在其他流行语言中常见的基于类的编程风格。但问题是：是否应当这样编写 JavaScript 代码？在 JavaScript 中的编程方式是否应与 C# 或 C++ 中的编码方式相同？是否有更聪明的方式来模拟 JavaScript 中没有的功能？每种编程语言都各不相同，一种语言的最佳做法，对另一种语言而言则可能并非最佳。
+在 JavaScript 中，您已看到对象继承对象（与类继承类不同）。因此，使用静态继承层次结构建立很多类的方式可能并不适合 JavaScript。也许，就像 Douglas Crockford 在他的文章 Prototypal Inheritance in JavaScript 中说的那样，JavaScript 编程方式是建立原型对象，并使用下面的简单对象函数建立新的对象，而后者则继承原始对象：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span>      <span class="kd">function</span> <span class="nx">object</span><span class="p">(</span><span class="nx">o</span><span class="p">)</span> <span class="p">{</span>
+<span class="lineno">2</span>         <span class="kd">function</span> <span class="nx">F</span><span class="p">()</span> <span class="p">{}</span>
+<span class="lineno">3</span>         <span class="nx">F</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">o</span><span class="p">;</span>
+<span class="lineno">4</span>         <span class="k">return</span> <span class="k">new</span> <span class="nx">F</span><span class="p">();</span>
+<span class="lineno">5</span>     <span class="p">}</span>
+<span class="lineno">6</span>                    
+</code></pre></div>
+
+
+<p>然后，由于 JavaScript 中的对象是可延展的，因此可以方便地在创建对象之后，根据需要用新字段和新方法增大对象。
 这的确很好，但它不可否认的是，全世界大多数开发人员更熟悉基于类的编程。实际上，基于类的编程也会在这里出现。按照即将颁发的 ECMA-262 规范第 4 版（ECMA-262 是 JavaScript 的官方规范），JavaScript 2.0 将拥有真正的类。因此，JavaScript 正在发展成为基于类的语言。但是，数年之后 JavaScript 2.0 才可能会被广泛使用。同时，必须清楚当前的 JavaScript 完全可以用基于原型的风格和基于类的风格读取和写入 JavaScript 代码。</p>
 
-<p>展望
-随着交互式胖客户端 AJAX 应用程序的广泛使用，JavaScript 迅速成为 .NET 开发人员最重要的工具之一。但是，它的原型性质可能一开始会让更习惯诸如 C++、C# 或 Visual Basic 等语言的开发人员感到吃惊。我已发现我的 JavaScript 学习经历给予了我丰富的体验，虽然其中也有一些挫折。如果本文能使您的体验更加顺利，我会非常高兴，因为这正是我的目标。</p>
+<h2>展望</h2>
+
+<p>随着交互式胖客户端 AJAX 应用程序的广泛使用，JavaScript 迅速成为 .NET 开发人员最重要的工具之一。但是，它的原型性质可能一开始会让更习惯诸如 C++、C# 或 Visual Basic 等语言的开发人员感到吃惊。我已发现我的 JavaScript 学习经历给予了我丰富的体验，虽然其中也有一些挫折。如果本文能使您的体验更加顺利，我会非常高兴，因为这正是我的目标。</p>
 
 </article>
 
