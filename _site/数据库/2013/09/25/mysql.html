@@ -1,0 +1,437 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta charset="utf-8">
+<title>【转】理解MySQL——索引与优化</title>
+
+
+<link rel="stylesheet" href="/static/css/base-common.css" />
+<link rel="stylesheet" href="/static/css/largefacescat.css" />
+
+
+<link rel="stylesheet" href="/static/css/syntax.css" />
+
+
+<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
+<!--[if lt IE 9]>
+<script src="/static/js/html5.js"></script>
+<![endif]-->
+  <script type="text/javascript">
+    function setTimeSpan(){
+    	var date = new Date();
+    	timeSpan.innerText=date.format('yyyy-MM-dd hh:mm:ss');
+    }
+    
+    Date.prototype.format = function(format)
+		{
+    var o =
+    	{
+    	    "M+" : this.getMonth()+1, //month
+    	    "d+" : this.getDate(),    //day
+    	    "h+" : this.getHours(),   //hour
+    	    "m+" : this.getMinutes(), //minute
+    	    "s+" : this.getSeconds(), //second
+    	    "q+" : Math.floor((this.getMonth()+3)/3),  //quarter
+    	    "S" : this.getMilliseconds() //millisecond
+    	}
+    	if(/(y+)/.test(format))
+    	format=format.replace(RegExp.$1,(this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    	for(var k in o)
+    	if(new RegExp("("+ k +")").test(format))
+    	format = format.replace(RegExp.$1,RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
+    	return format;
+		}
+  </script>
+</head>
+ 
+  <body onLoad="setInterval(setTimeSpan,1000);">
+<header id="menu">
+  <nav class="fn-clear">
+    <a href="/" id="logo" class="fn-left">Largefacescat</a>
+    <a href="/article/" id="link-article" class="fn-left">Article</a>
+    <a href="/categories/" id="link-categories" class="fn-left">Categories</a>
+    <a href="/tags/" id="link-tags" class="fn-left">Tags</a>
+    <a href="https://github.com/largefacescat" class="fn-left">Github</a>
+    <a href="/about/" id="link-aboutme" class="fn-left">About</a>
+  </nav>
+</header>
+<div id="main">
+<style>
+article {
+  margin: 70px 0 20px 0;
+  background: #fff;
+  color:#666;
+  padding: 10px 10px 0px 10px;
+}
+article h1 {
+  text-align:center;
+  font-size:26px;
+  font-weight:bold;
+  line-height:2;
+  color:black;
+}
+article h2 {
+  font-weight:bold;
+  line-height:2;
+  color:black;
+  font-size:20px;
+  margin-top:10px;
+}
+article h3 {
+  font-weight:bold;
+  line-height:2;
+  color:black;
+  font-size:18px;
+  margin-top:10px;
+}
+article p {
+  margin:12px 0;
+  text-indent:2em;
+  font-size:16px;
+  line-height:1.8;
+}
+article p b {
+  font-weight:bold;
+  color:#333;
+}
+article ol {
+  list-style:decimal;
+  margin-left:25px;
+  font-size:16px;
+  line-height:1.6;
+}
+article p code {
+  background:#333;
+  color: white;
+}
+td 
+{
+border-style:solid;
+}
+</style>
+<article >
+  <h1>【转】理解MySQL——索引与优化</h1>
+  <p>写在前面：索引对查询的速度有着至关重要的影响，理解索引也是进行数据库性能调优的起点。考虑如下情况，假设数据库中一个表有10<sup>6</sup>条记录，DBMS的页面大小为4K，并存储100条记录。如果没有索引，查询将对整个表进行扫描，最坏的情况下，如果所有数据页都不在内存，需要读取10<sup>4</sup>个页面，如果这10<sup>4</sup>个页面在磁盘上随机分布，需要进行10<sup>4</sup>次I/O，假设磁盘每次I/O时间为10ms(忽略数据传输时间)，则总共需要100s(但实际上要好很多很多)。如果对之建立B-Tree索引，则只需要进行log100(10<sup>6</sup>)=3次页面读取，最坏情况下耗时30ms。这就是索引带来的效果，很多时候，当你的应用程序进行SQL查询速度很慢时，应该想想是否可以建索引。进入正题：</p>
+
+<h2>第二章、索引与优化</h2>
+
+<h2>1、选择索引的数据类型</h2>
+
+<p>MySQL支持很多数据类型，选择合适的数据类型存储数据对性能有很大的影响。通常来说，可以遵循以下一些指导原则：</p>
+
+<p>(1).越小的数据类型通常更好：越小的数据类型通常在磁盘、内存和CPU缓存中都需要更少的空间，处理起来更快。</p>
+
+<p>(2).简单的数据类型更好：整型数据比起字符，处理开销更小，因为字符串的比较更复杂。在MySQL中，应该用内置的日期和时间数据类型，而不是用字符串来存储时间；以及用整型数据类型存储IP地址。</p>
+
+<p>(3).尽量避免NULL：应该指定列为NOT NULL，除非你想存储NULL。在MySQL中，含有空值的列很难进行查询优化，因为它们使得索引、索引的统计信息以及比较运算更加复杂。你应该用0、一个特殊的值或者一个空串代替空值。</p>
+
+<h4>1.1、选择标识符</h4>
+
+<p>选择合适的标识符是非常重要的。选择时不仅应该考虑存储类型，而且应该考虑MySQL是怎样进行运算和比较的。一旦选定数据类型，应该保证所有相关的表都使用相同的数据类型。
+(1). 整型：通常是作为标识符的最好选择，因为可以更快的处理，而且可以设置为AUTO_INCREMENT。
+(2).  字符串：尽量避免使用字符串作为标识符，它们消耗更好的空间，处理起来也较慢。而且，通常来说，字符串都是随机的，所以它们在索引中的位置也是随机的，这会导致页面分裂、随机访问磁盘，聚簇索引分裂（对于使用聚簇索引的存储引擎）。</p>
+
+<h2>2、索引入门</h2>
+
+<p>对于任何DBMS，索引都是进行优化的最主要的因素。对于少量的数据，没有合适的索引影响不是很大，但是，当随着数据量的增加，性能会急剧下降。
+如果对多列进行索引(组合索引)，列的顺序非常重要，MySQL仅能对索引最左边的前缀进行有效的查找。例如：
+假设存在组合索引it1c1c2(c1,c2)，查询语句select * from t1 where c1=1 and c2=2能够使用该索引。查询语句select * from t1 where c1=1也能够使用该索引。但是，查询语句select * from t1 where c2=2不能够使用该索引，因为没有组合索引的引导列，即，要想使用c2列进行查找，必需出现c1等于某值。</p>
+
+<h4>2.1、索引的类型</h4>
+
+<p>索引是在存储引擎中实现的，而不是在服务器层中实现的。所以，每种存储引擎的索引都不一定完全相同，并不是所有的存储引擎都支持所有的索引类型。</p>
+
+<p>2.1.1、B-Tree索引
+假设有如下一个表：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno"> 1</span> <span class="nx">CREATE</span> <span class="nx">TABLE</span> <span class="nx">People</span> <span class="p">(</span>
+<span class="lineno"> 2</span> 
+<span class="lineno"> 3</span>    <span class="nx">last_name</span> <span class="nx">varchar</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>    <span class="nx">not</span> <span class="kc">null</span><span class="p">,</span>
+<span class="lineno"> 4</span> 
+<span class="lineno"> 5</span>    <span class="nx">first_name</span> <span class="nx">varchar</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>    <span class="nx">not</span> <span class="kc">null</span><span class="p">,</span>
+<span class="lineno"> 6</span> 
+<span class="lineno"> 7</span>    <span class="nx">dob</span>        <span class="nx">date</span>           <span class="nx">not</span> <span class="kc">null</span><span class="p">,</span>
+<span class="lineno"> 8</span> 
+<span class="lineno"> 9</span>    <span class="nx">gender</span>     <span class="kr">enum</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span> <span class="nx">not</span> <span class="kc">null</span><span class="p">,</span>
+<span class="lineno">10</span> 
+<span class="lineno">11</span>    <span class="nx">key</span><span class="p">(</span><span class="nx">last_name</span><span class="p">,</span> <span class="nx">first_name</span><span class="p">,</span> <span class="nx">dob</span><span class="p">)</span>
+<span class="lineno">12</span> 
+<span class="lineno">13</span> <span class="p">);</span>
+</code></pre></div>
+
+
+<p> 其索引包含表中每一行的last_name、first_name和dob列。其结构大致如下：
+<img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-01.JPG" alt="" /></p>
+
+<p>索引存储的值按索引列中的顺序排列。可以利用B-Tree索引进行全关键字、关键字范围和关键字前缀查询，当然，如果想使用索引，你必须保证按索引的最左边前缀(leftmost prefix of the index)来进行查询。</p>
+
+<p>(1).匹配全值(Match the full value)：对索引中的所有列都指定具体的值。例如，上图中索引可以帮助你查找出生于1960-01-01的Cuba Allen。</p>
+
+<p>(2).匹配最左前缀(Match a leftmost prefix)：你可以利用索引查找last name为Allen的人，仅仅使用索引中的第1列。</p>
+
+<p>(3).匹配列前缀(Match a column prefix)：例如，你可以利用索引查找last name以J开始的人，这仅仅使用索引中的第1列。</p>
+
+<p>(4).匹配值的范围查询(Match a range of values)：可以利用索引查找last name在Allen和Barrymore之间的人，仅仅使用索引中第1列。</p>
+
+<p>(5).匹配部分精确而其它部分进行范围匹配(Match one part exactly and match a range on another part)：可以利用索引查找last name为Allen，而first name以字母K开始的人。</p>
+
+<p>(6).仅对索引进行查询(Index-only queries)：如果查询的列都位于索引中，则不需要读取元组的值。</p>
+
+<p>由于B-树中的节点都是顺序存储的，所以可以利用索引进行查找(找某些值)，也可以对查询结果进行ORDER BY。当然，使用B-tree索引有以下一些限制：</p>
+
+<p>(1) .查询必须从索引的最左边的列开始。关于这点已经提了很多遍了。例如你不能利用索引查找在某一天出生的人。</p>
+
+<p>(2) .不能跳过某一索引列。例如，你不能利用索引查找last name为Smith且出生于某一天的人。</p>
+
+<p>(3) .存储引擎不能使用索引中范围条件右边的列。例如，如果你的查询语句为WHERE last_name="Smith" AND first_name LIKE 'J%' AND dob='1976-12-23'，则该查询只会使用索引中的前两列，因为LIKE是范围查询。</p>
+
+<p>2.1.2、Hash索引</p>
+
+<p>MySQL中，只有Memory存储引擎显示支持hash索引，是Memory表的默认索引类型，尽管Memory表也可以使用B-Tree索引。Memory存储引擎支持非唯一hash索引，这在数据库领域是罕见的，如果多个值有相同的hash code，索引把它们的行指针用链表保存到同一个hash表项中。
+假设创建如下一个表：</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="lineno">1</span> <span class="nx">CREATE</span> <span class="nx">TABLE</span> <span class="nx">testhash</span> <span class="p">(</span>
+<span class="lineno">2</span>    <span class="nx">fname</span> <span class="nx">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="nx">NOT</span> <span class="nx">NULL</span><span class="p">,</span>
+<span class="lineno">3</span>    <span class="nx">lname</span> <span class="nx">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="nx">NOT</span> <span class="nx">NULL</span><span class="p">,</span>
+<span class="lineno">4</span>    <span class="nx">KEY</span> <span class="nx">USING</span> <span class="nx">HASH</span><span class="p">(</span><span class="nx">fname</span><span class="p">)</span>
+<span class="lineno">5</span> <span class="p">)</span> <span class="nx">ENGINE</span><span class="o">=</span><span class="nx">MEMORY</span><span class="p">;</span>
+</code></pre></div>
+
+
+<p>包含的数据如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-02.JPG" alt="" /></p>
+
+<p>假设索引使用hash函数f( )，如下：
+<td>
+f('Arjen') = 2323</p>
+
+<p>f('Baron') = 7437</p>
+
+<p>f('Peter') = 8784</p>
+
+<p>f('Vadim') = 2458</p>
+
+<p></td>
+此时，索引的结构大概如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-03.JPG" alt="" /></p>
+
+<p> Slots是有序的，但是记录不是有序的。当你执行
+mysql> SELECT lname FROM testhash WHERE fname='Peter';
+MySQL会计算’Peter’的hash值，然后通过它来查询索引的行指针。因为f('Peter') = 8784，MySQL会在索引中查找8784，得到指向记录3的指针。
+因为索引自己仅仅存储很短的值，所以，索引非常紧凑。Hash值不取决于列的数据类型，一个TINYINT列的索引与一个长字符串列的索引一样大。</p>
+
+<p>Hash索引有以下一些限制：</p>
+
+<p>(1).由于索引仅包含hash code和记录指针，所以，MySQL不能通过使用索引避免读取记录。但是访问内存中的记录是非常迅速的，不会对性造成太大的影响。</p>
+
+<p>(2).不能使用hash索引排序。</p>
+
+<p>(3).Hash索引不支持键的部分匹配，因为是通过整个索引值来计算hash值的。</p>
+
+<p>(4).Hash索引只支持等值比较，例如使用=，IN( )和&lt;=>。对于WHERE price>100并不能加速查询。</p>
+
+<h4>2.1.3、空间(R-Tree)索引</h4>
+
+<p>MyISAM支持空间索引，主要用于地理空间数据类型，例如GEOMETRY。</p>
+
+<h4>2.1.4、全文(Full-text)索引</h4>
+
+<p>全文索引是MyISAM的一个特殊索引类型，主要用于全文检索。</p>
+
+<h2>3、高性能的索引策略</h2>
+
+<h3>3.1、聚簇索引(Clustered Indexes)</h3>
+
+<p>聚簇索引保证关键字的值相近的元组存储的物理位置也相同（所以字符串类型不宜建立聚簇索引，特别是随机字符串，会使得系统进行大量的移动操作），且一个表只能有一个聚簇索引。因为由存储引擎实现索引，所以，并不是所有的引擎都支持聚簇索引。目前，只有solidDB和InnoDB支持。
+聚簇索引的结构大致如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-04.JPG" alt="" /></p>
+
+<p> 注：叶子页面包含完整的元组，而内节点页面仅包含索引的列(索引的列为整型)。一些DBMS允许用户指定聚簇索引，但是MySQL的存储引擎到目前为止都不支持。InnoDB对主键建立聚簇索引。如果你不指定主键，InnoDB会用一个具有唯一且非空值的索引来代替。如果不存在这样的索引，InnoDB会定义一个隐藏的主键，然后对其建立聚簇索引。一般来说，DBMS都会以聚簇索引的形式来存储实际的数据，它是其它二级索引的基础。</p>
+
+<p> ###3.1.1、InnoDB和MyISAM的数据布局的比较</p>
+
+<p> 为了更加理解聚簇索引和非聚簇索引，或者primary索引和second索引(MyISAM不支持聚簇索引)，来比较一下InnoDB和MyISAM的数据布局，对于如下表：</p>
+
+<p><td></p>
+
+<p>CREATE TABLE layout_test (</p>
+
+<p>   col1 int NOT NULL,</p>
+
+<p>   col2 int NOT NULL,</p>
+
+<p>   PRIMARY KEY(col1),</p>
+
+<p>   KEY(col2)</p>
+
+<p>);
+</td>
+假设主键的值位于1---10,000之间，且按随机顺序插入，然后用OPTIMIZE TABLE进行优化。col2随机赋予1---100之间的值，所以会存在许多重复的值。
+*(1)    MyISAM的数据布局</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-05.JPG" alt="" /></p>
+
+<p> 注：左边为行号(row number)，从0开始。因为元组的大小固定，所以MyISAM可以很容易的从表的开始位置找到某一字节的位置。
+据些建立的primary key的索引结构大致如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-06.JPG" alt="" /></p>
+
+<p> 注：MyISAM不支持聚簇索引，索引中每一个叶子节点仅仅包含行号(row number)，且叶子节点按照col1的顺序存储。
+来看看col2的索引结构：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-07.JPG" alt="" /></p>
+
+<p> 实际上，在MyISAM中，primary key和其它索引没有什么区别。Primary key仅仅只是一个叫做PRIMARY的唯一，非空的索引而已。</p>
+
+<p>(2)    InnoDB的数据布局</p>
+
+<p>InnoDB按聚簇索引的形式存储数据，所以它的数据布局有着很大的不同。它存储表的结构大致如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-08.JPG" alt="" /></p>
+
+<p> 注：聚簇索引中的每个叶子节点包含primary key的值，事务ID和回滚指针(rollback pointer)——用于事务和MVCC，和余下的列(如col2)。<br></p>
+
+<p> 相对于MyISAM，二级索引与聚簇索引有很大的不同。InnoDB的二级索引的叶子包含primary key的值，而不是行指针(row pointers)，这减小了移动数据或者数据页面分裂时维护二级索引的开销，因为InnoDB不需要更新索引的行指针。其结构大致如下： <br>
+ <img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-09.JPG" alt="" /></p>
+
+<p>  聚簇索引和非聚簇索引表的对比：</p>
+
+<p>   <img src="http://images.cnblogs.com/cnblogs_com/hustcat/mysql/mysql02-10.JPG" alt="" /></p>
+
+<p>3.1.2、按primary key的顺序插入行(InnoDB)  </br></p>
+
+<p>如果你用InnoDB，而且不需要特殊的聚簇索引，一个好的做法就是使用代理主键(surrogate key)——独立于你的应用中的数据。最简单的做法就是使用一个AUTO_INCREMENT的列，这会保证记录按照顺序插入，而且能提高使用primary key进行连接的查询的性能。应该尽量避免随机的聚簇主键，例如，字符串主键就是一个不好的选择，它使得插入操作变得随机。</p>
+
+<h3>3.2、覆盖索引(Covering Indexes)</h3>
+
+<p>如果索引包含满足查询的所有数据，就称为覆盖索引。覆盖索引是一种非常强大的工具，能大大提高查询性能。只需要读取索引而不用读取数据有以下一些优点：</p>
+
+<p>(1)索引项通常比记录要小，所以MySQL访问更少的数据；</p>
+
+<p>(2)索引都按值的大小顺序存储，相对于随机访问记录，需要更少的I/O；</p>
+
+<p>(3)大多数据引擎能更好的缓存索引。比如MyISAM只缓存索引。</p>
+
+<p>(4)覆盖索引对于InnoDB表尤其有用，因为InnoDB使用聚集索引组织数据，如果二级索引中包含查询所需的数据，就不再需要在聚集索引中查找了。</p>
+
+<p>覆盖索引不能是任何索引，只有B-TREE索引存储相应的值。而且不同的存储引擎实现覆盖索引的方式都不同，并不是所有存储引擎都支持覆盖索引(Memory和Falcon就不支持)。
+对于索引覆盖查询(index-covered query)，使用EXPLAIN时，可以在Extra一列中看到“Using index”。例如，在sakila的inventory表中，有一个组合索引(store_id,film_id)，对于只需要访问这两列的查询，MySQL就可以使用索引，如下：</p>
+
+<p><td></p>
+
+<p>mysql> EXPLAIN SELECT store_id, film_id FROM sakila.inventory\G</p>
+
+<p><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><em> 1. row </em></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>
+
+<pre><code>       id: 1
+</code></pre>
+
+<p> select_type: SIMPLE</p>
+
+<pre><code>    table: inventory
+
+     type: index
+</code></pre>
+
+<p>possible_keys: NULL</p>
+
+<pre><code>      key: idx_store_id_film_id
+
+  key_len: 3
+
+      ref: NULL
+
+     rows: 5007
+
+    Extra: Using index
+</code></pre>
+
+<p>1 row in set (0.17 sec)
+</td></p>
+
+<p>在大多数引擎中，只有当查询语句所访问的列是索引的一部分时，索引才会覆盖。但是，InnoDB不限于此，InnoDB的二级索引在叶子节点中存储了primary key的值。因此，sakila.actor表使用InnoDB，而且对于是last_name上有索引，所以，索引能覆盖那些访问actor_id的查询，如：</p>
+
+<p>:---------------|</p>
+
+<p>mysql> EXPLAIN SELECT actor_id, last_name</p>
+
+<pre><code>-&gt; FROM sakila.actor WHERE last_name = 'HOPPER'\G
+</code></pre>
+
+<p><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><em> 1. row </em></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>
+
+<pre><code>       id: 1
+</code></pre>
+
+<p> select_type: SIMPLE</p>
+
+<pre><code>    table: actor
+
+     type: ref
+</code></pre>
+
+<p>possible_keys: idx_actor_last_name</p>
+
+<pre><code>      key: idx_actor_last_name
+
+  key_len: 137
+
+      ref: const
+
+     rows: 2
+
+    Extra: Using where; Using index
+</code></pre>
+
+<p>|</p>
+
+<h3>3.3、利用索引进行排序</h3>
+
+<p>MySQL中，有两种方式生成有序结果集：一是使用filesort，二是按索引顺序扫描。利用索引进行排序操作是非常快的，而且可以利用同一索引同时进行查找和排序操作。当索引的顺序与ORDER BY中的列顺序相同且所有的列是同一方向(全部升序或者全部降序)时，可以使用索引来排序。如果查询是连接多个表，仅当ORDER BY中的所有列都是第一个表的列时才会使用索引。其它情况都会使用filesort。</p>
+
+</article>
+
+<!-- Duoshuo Comment BEGIN -->
+  <div class="ds-thread"></div>
+  <script type="text/javascript">
+  var duoshuoQuery = {short_name:"largefacescat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- Duoshuo Comment END -->
+</div>
+
+    <footer>
+        <p><small>Powered by <a href="https://github.com/mojombo/jekyll">Jekyll</a> & <a href="http://pages.github.com">GitHub</a> | Copyright 2013 - 2013 by <a href="/aboutme/">largefacescat</a> | <span class="label label-info" id="timeSpan"></span></small></p>
+    </footer>
+
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-23358884-1']);
+_gaq.push(['_trackPageview']);
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+</script>
+    <!-- Baidu Button BEGIN -->
+    <script type="text/javascript" id="bdshare_js" data="type=slide&amp;img=4&amp;pos=right&amp;uid=541841" ></script>
+    <script type="text/javascript" id="bdshell_js"></script>
+    <script type="text/javascript">
+    var bds_config={"bdTop":170};
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
+    </script>
+    <!-- Baidu Button END -->
+</body> 
+</html>

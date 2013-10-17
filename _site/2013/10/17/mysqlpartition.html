@@ -2,7 +2,7 @@
 <html> 
 <head> 
 <meta charset="utf-8">
-<title>Tags</title>
+<title>【转】理解MySQL——并行数据库与分区(Partition)</title>
 
 
 <link rel="stylesheet" href="/static/css/base-common.css" />
@@ -52,115 +52,79 @@
   </nav>
 </header>
 <div id="main">
-
+<style>
+article {
+  margin: 70px 0 20px 0;
+  background: #fff;
+  color:#666;
+  padding: 10px 10px 0px 10px;
+}
+article h1 {
+  text-align:center;
+  font-size:26px;
+  font-weight:bold;
+  line-height:2;
+  color:black;
+}
+article h2 {
+  font-weight:bold;
+  line-height:2;
+  color:black;
+  font-size:20px;
+  margin-top:10px;
+}
+article h3 {
+  font-weight:bold;
+  line-height:2;
+  color:black;
+  font-size:18px;
+  margin-top:10px;
+}
+article p {
+  margin:12px 0;
+  text-indent:2em;
+  font-size:16px;
+  line-height:1.8;
+}
+article p b {
+  font-weight:bold;
+  color:#333;
+}
+article ol {
+  list-style:decimal;
+  margin-left:25px;
+  font-size:16px;
+  line-height:1.6;
+}
+article p code {
+  background:#333;
+  color: white;
+}
+td 
+{
+border-style:solid;
+}
 </style>
-    <section id="tags" class="list container">
-    <ul>
-    <h4 class="title">Tags</h4>
- 
-  <ul class="tag_box inline">
-    
-   
-
-
-  
-     
-    	<li><a href="#MySQL-ref">MySQL <span>1</span></a></li>
-     
-    	<li><a href="#javaScript-ref">javaScript <span>2</span></a></li>
-     
-    	<li><a href="#jQuery-ref">jQuery <span>2</span></a></li>
-    
+<article >
+  <h1>【转】理解MySQL——并行数据库与分区(Partition)</h1>
   
 
+</article>
 
-
-  </ul>
-
-
- 
-  <h2 id="MySQL-ref">MySQL</h2>
-  <ul class="listing-item">
-      
-    
-
-
-  
-    
-      
-      	
-      	<li><a href="/%E6%95%B0%E6%8D%AE%E5%BA%93/2013/09/25/mysql.html">【转】理解MySQL——索引与优化</a></li>
-      	
-      
-    
-  
-
-
-
-  </ul>
- 
-  <h2 id="javaScript-ref">javaScript</h2>
-  <ul class="listing-item">
-      
-    
-
-
-  
-    
-      
-      	
-      	<li><a href="/%E5%89%8D%E7%AB%AF/2013/09/24/-web-.html">[转发]使用面向对象的技术创建高级 Web 应用程序</a></li>
-      	
-      
-    
-  
-    
-      
-      	
-      	<li><a href="/%E5%89%8D%E7%AB%AF/2012/08/26/seajs-require-theory.html">seajs模块依赖的加载处理</a></li>
-      	
-      
-    
-  
-
-
-
-  </ul>
- 
-  <h2 id="jQuery-ref">jQuery</h2>
-  <ul class="listing-item">
-      
-    
-
-
-  
-    
-      
-      	
-      	<li><a href="/%E5%89%8D%E7%AB%AF/2012/08/15/seajs-jquery-plugin.html">【转】jQuery 模块介绍与 jQuery 插件的深度模块化</a></li>
-      	
-      
-    
-  
-    
-      
-      	
-      	<li><a href="/2011/05/10/learn-jquery-event.html">jQuery Event 源码学习</a></li>
-      	
-      
-    
-  
-
-
-
-  </ul>
-
-    </ul>
-</section>
-
-
-
-
+<!-- Duoshuo Comment BEGIN -->
+  <div class="ds-thread"></div>
+  <script type="text/javascript">
+  var duoshuoQuery = {short_name:"largefacescat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- Duoshuo Comment END -->
 </div>
 
     <footer>
